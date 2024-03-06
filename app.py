@@ -6,7 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm, EditProfileForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Follow
 
 load_dotenv()
 
@@ -90,7 +90,7 @@ def signup():
             return render_template('users/signup.html', form=form)
 
         do_login(user)
-        # breakpoint()
+
         return redirect("/")
 
     else:
@@ -162,7 +162,7 @@ def list_users():
         users = User.query.all()
     else:
         users = User.query.filter(User.username.like(f"%{search}%")).all()
-
+    breakpoint()
     return render_template('users/index.html', users=users)
 
 
@@ -214,9 +214,10 @@ def start_following(follow_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    followed_user = User.query.get_or_404(follow_id)
-    g.user.following.append(followed_user)
-    db.session.commit()
+    if g.csrf_form.validate_on_submit():
+        followed_user = User.query.get_or_404(follow_id)
+        g.user.following.append(followed_user)
+        db.session.commit()
 
     return redirect(f"/users/{g.user.id}/following")
 
@@ -358,10 +359,10 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of self & followed_users
     """
-
+# FIXME: fix query
     if g.user:
         messages = (Message
-                    .query
+                    .query.filter(g.user.id == Message.user_id or Follow.user_following_id == Message.user_id )
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
