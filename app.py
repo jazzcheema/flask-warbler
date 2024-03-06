@@ -176,7 +176,7 @@ def show_user(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    return render_template('users/show.html', user=user, form=g.csrf_form)
+    return render_template('users/show.html', user=user, form = g.csrf_form)
 
 
 @app.get('/users/<int:user_id>/following')
@@ -188,7 +188,7 @@ def show_following(user_id):
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/following.html', user=user)
+    return render_template('users/following.html', user=user, form= g.csrf_form)
 
 
 @app.get('/users/<int:user_id>/followers')
@@ -200,7 +200,7 @@ def show_followers(user_id):
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/followers.html', user=user)
+    return render_template('users/followers.html', user=user, form= g.csrf_form)
 
 
 @app.post('/users/follow/<int:follow_id>')
@@ -250,15 +250,25 @@ def profile():
     form = EditProfileForm(obj=g.user)
 
     if form.validate_on_submit():
-        g.user.location = form.location.data
-        g.user.bio = form.bio.data
-        g.user.header_image_url = form.header_image_url.data
+        user = User.authenticate(
+            form.username.data,
+            form.password.data,
+        )
+        if user:
 
-        db.session.commit()
-        user_id = session[CURR_USER_KEY]
-        return redirect(f"/users/{user_id}")
+            # g.user.username = form.username.data
+            g.user.email = form.email.data
+            g.user.image_url = form.image_url.data
+            # g.user.password = form.password.data
+            g.user.location = form.location.data
+            g.user.bio = form.bio.data
+            g.user.header_image_url = form.header_image_url.data
 
-    return render_template('/users/detail.html', form=form, user=g.user)
+            db.session.commit()
+            user_id = session[CURR_USER_KEY]
+            return redirect(f"/users/{user_id}")
+
+    return render_template('/users/edit.html', form=form, user=g.user)
 
 
 @app.post('/users/delete')

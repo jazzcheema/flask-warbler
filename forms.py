@@ -50,7 +50,7 @@ class CSRFProtectForm(FlaskForm):
     """Form just for CSRF Protection."""
 
 
-class EditProfileForm(FlaskForm):
+class EditProfileForm(UserAddForm):
     """Form for updating user information."""
 
     location = StringField(
