@@ -1,11 +1,11 @@
 import os
 from dotenv import load_dotenv
-
+from werkzeug.exceptions import Unauthorized
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm
 from models import db, connect_db, User, Message
 
 load_dotenv()
@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 toolbar = DebugToolbarExtension(app)
 
@@ -36,6 +36,11 @@ def add_user_to_g():
 
     else:
         g.user = None
+
+@app.before_request
+def add_csrf_to_g():
+    """ Add CSRF token to Flask global"""
+    g.csrf_form = CSRFProtectForm()
 
 
 def do_login(user):
@@ -82,7 +87,7 @@ def signup():
             return render_template('users/signup.html', form=form)
 
         do_login(user)
-
+        # breakpoint()
         return redirect("/")
 
     else:
@@ -115,7 +120,15 @@ def login():
 def logout():
     """Handle logout of user and redirect to homepage."""
 
-    form = g.csrf_form
+    if g.csrf_form.validate_on_submit():
+        do_logout()
+        flash(f"You've been logged out")
+        return redirect('/')
+    else:
+        flash(f"You don't have access")
+        raise Unauthorized()
+
+
 
     # IMPLEMENT THIS AND FIX BUG
     # DO NOT CHANGE METHOD ON ROUTE
@@ -320,7 +333,10 @@ def homepage():
                     .limit(100)
                     .all())
 
-        return render_template('home.html', messages=messages)
+        return render_template(
+            'home.html',
+            messages=messages,
+            form = g.csrf_form)
 
     else:
         return render_template('home-anon.html')
