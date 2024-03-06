@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm
+from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm, EditProfileForm
 from models import db, connect_db, User, Message
 
 load_dotenv()
@@ -39,7 +39,7 @@ def add_user_to_g():
 
 @app.before_request
 def add_csrf_to_g():
-    """ Add CSRF token to Flask global"""
+    """Add CSRF token to Flask global"""
     g.csrf_form = CSRFProtectForm()
 
 
@@ -69,6 +69,9 @@ def signup():
     """
 
     do_logout()
+
+    if CURR_USER_KEY in session:
+        return redirect(f"/users/{CURR_USER_KEY}")
 
     form = UserAddForm()
 
@@ -100,6 +103,9 @@ def login():
 
     form = LoginForm()
 
+    if CURR_USER_KEY in session:
+        return redirect(f"/users/{CURR_USER_KEY}")
+
     if form.validate_on_submit():
         user = User.authenticate(
             form.username.data,
@@ -120,6 +126,10 @@ def login():
 def logout():
     """Handle logout of user and redirect to homepage."""
 
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
     if g.csrf_form.validate_on_submit():
         do_logout()
         flash(f"You've been logged out")
@@ -130,8 +140,6 @@ def logout():
 
 
 
-    # IMPLEMENT THIS AND FIX BUG
-    # DO NOT CHANGE METHOD ON ROUTE
 
 
 ##############################################################################
@@ -168,7 +176,7 @@ def show_user(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    return render_template('users/show.html', user=user)
+    return render_template('users/show.html', user=user, form=g.csrf_form)
 
 
 @app.get('/users/<int:user_id>/following')
@@ -235,7 +243,22 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = EditProfileForm(obj=g.user)
+
+    if form.validate_on_submit():
+        g.user.location = form.location.data
+        g.user.bio = form.bio.data
+        g.user.header_image_url = form.header_image_url.data
+
+        db.session.commit()
+        user_id = session[CURR_USER_KEY]
+        return redirect(f"/users/{user_id}")
+
+    return render_template('/users/detail.html', form=form, user=g.user)
 
 
 @app.post('/users/delete')

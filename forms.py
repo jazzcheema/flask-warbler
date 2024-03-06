@@ -47,4 +47,23 @@ class LoginForm(FlaskForm):
     )
 
 class CSRFProtectForm(FlaskForm):
-    """Form just for CSRF Protection"""
+    """Form just for CSRF Protection."""
+
+
+class EditProfileForm(FlaskForm):
+    """Form for updating user information."""
+
+    location = StringField(
+        'Location',
+        validators=[InputRequired(), Length(max=30)],
+    )
+
+    bio = TextAreaField(
+        'Bio',
+        validators=[InputRequired()],
+    )
+
+    header_image_url = StringField(
+        'Image URL',
+        validators=[InputRequired(), Length(max=255), URL()],
+    )
