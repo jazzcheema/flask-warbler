@@ -20,8 +20,9 @@
         <p>{{ message.text }}</p>
         {% if g.user.id != message.user_id%}
         <form>
-          <button type="submit" formmethod="POST" formaction="/messages/{{message.id}}/like"><i
-              class={{star}}></i></button>
+          <button type="submit" formmethod="POST" formaction="/messages/{{message.id}}/like" class="messages-like"><i
+              class='bi bi-star'></i>
+          </button>
         </form>
         {% endif %}
       </div>

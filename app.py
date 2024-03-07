@@ -360,9 +360,9 @@ def delete_message(message_id):
 
 @app.post('/messages/<int:message_id>/like')
 def like_unlike_message(message_id):
-
+#TODO: pass instance get or 404
     if g.user.like_message(message_id):
-        
+
         redirect(f"/users/{g.user.id}", star = LIKED_STAR)
 
 

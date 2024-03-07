@@ -56,7 +56,8 @@
           <p>{{ msg.text }}</p>
           {% if g.user.id != msg.user_id%}
           <form>
-            <button type="submit" formmethod="POST" formaction="/messages/{{msg.id}}/like"><i class={{star}}></i></button>
+            <button type="submit" formmethod="POST" formaction="/messages/{{msg.id}}/like" class="messages-like"><i
+                class={{star}}></i></button>
           </form>
           {% endif %}
         </div>
