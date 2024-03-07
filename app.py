@@ -11,6 +11,9 @@ load_dotenv()
 
 CURR_USER_KEY = "curr_user"
 
+LIKED_STAR = "bi bi-star-fill"
+UNLIKED_STAR = "bi bi-star"
+
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
@@ -353,6 +356,19 @@ def delete_message(message_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
+
+
+@app.post('/messages/<int:message_id>/like')
+def like_unlike_message(message_id):
+
+    if g.user.like_message(message_id):
+        
+        redirect(f"/users/{g.user.id}", star = LIKED_STAR)
+
+
+    g.user.unlike_message(message_id)
+    redirect(f"/users/{g.user.id}", star = UNLIKED_STAR)
+
 
 
 ##############################################################################

@@ -173,15 +173,23 @@ class User(db.Model):
             user for user in self.following if user == other_user]
         return len(found_user_list) == 1
 
-    def like_message(self, message):
+    def like_message(self, message_id):
         """ User likes a message"""
-        if message.id not in self.likes:
-            self.likes.append(message.id)
+        if message_id not in self.likes:
+            self.likes.append(message_id)
+            db.session.commit()
+            return True
+        else:
+            return False
 
-    def unlike_message(self, message):
+    def unlike_message(self, message_id):
         """ User unlikes a message"""
-        if message.id in self.likes:
-            self.likes.remove(message.id)
+        if message_id in self.likes:
+            self.likes.remove(message_id)
+            db.session.commit()
+            return True
+        else:
+            return False
 
 
 class Message(db.Model):
