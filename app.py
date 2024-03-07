@@ -261,9 +261,7 @@ def profile():
         if user:
 
             g.user.email = form.email.data
-            g.user.image_url = request.form.get(
-                form.image_url.data,
-                DEFAULT_IMAGE_URL) or None
+            g.user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
             g.user.location = form.location.data
             g.user.bio = form.bio.data
             g.user.header_image_url = form.header_image_url.data
