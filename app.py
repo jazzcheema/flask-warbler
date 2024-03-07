@@ -181,7 +181,6 @@ def show_user(user_id):
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-
     return render_template('users/show.html', user=user)
 
 
@@ -360,14 +359,17 @@ def delete_message(message_id):
 
 @app.post('/messages/<int:message_id>/like')
 def like_unlike_message(message_id):
-#TODO: pass instance get or 404
-    if g.user.like_message(message_id):
+    #TODO: pass instance get or 404
 
-        redirect(f"/users/{g.user.id}", star = LIKED_STAR)
+    message = Message.query.get_or_404(message_id)
+    if g.user.like_message(message):
+        db.session.commit()
+        return redirect(f"/users/{g.user.id}")
 
-
-    g.user.unlike_message(message_id)
-    redirect(f"/users/{g.user.id}", star = UNLIKED_STAR)
+    else:
+        g.user.unlike_message(message)
+        db.session.commit()
+        return redirect(f"/users/{g.user.id}")
 
 
 
