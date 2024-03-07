@@ -64,6 +64,6 @@ class EditProfileForm(UserAddForm):
     )
 
     header_image_url = StringField(
-        'Image URL',
+        'Banner Img URL',
         validators=[InputRequired(), Length(max=255), URL()],
     )

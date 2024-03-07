@@ -6,8 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm, EditProfileForm
-from models import db, connect_db, User, Message, Follow
-
+from models import db, connect_db, User, Message, DEFAULT_IMAGE_URL
 load_dotenv()
 
 CURR_USER_KEY = "curr_user"
@@ -76,6 +75,11 @@ def signup():
     form = UserAddForm()
 
     if form.validate_on_submit():
+        if User.query.filter(form.email.data == User.email).one_or_none():
+            form.email.errors = ["Email already exists"]
+            return render_template('users/signup.html', form=form)
+        # if User.query.filter(form.email.data == User.email).one_or_none():
+        #     errs.append("Email already exists")
         try:
             user = User.signup(
                 username=form.username.data,
@@ -162,7 +166,6 @@ def list_users():
         users = User.query.all()
     else:
         users = User.query.filter(User.username.like(f"%{search}%")).all()
-    breakpoint()
     return render_template('users/index.html', users=users)
 
 
@@ -257,17 +260,20 @@ def profile():
         )
         if user:
 
-            # g.user.username = form.username.data
             g.user.email = form.email.data
-            g.user.image_url = form.image_url.data
-            # g.user.password = form.password.data
+            g.user.image_url = request.form.get(
+                form.image_url.data,
+                DEFAULT_IMAGE_URL) or None
             g.user.location = form.location.data
             g.user.bio = form.bio.data
             g.user.header_image_url = form.header_image_url.data
 
             db.session.commit()
             user_id = session[CURR_USER_KEY]
+
             return redirect(f"/users/{user_id}")
+        else:
+            flash("Wrong password")
 
     return render_template('/users/edit.html', form=form, user=g.user)
 
@@ -283,12 +289,16 @@ def delete_user():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    do_logout()
+    if g.csrf_form.validate_on_submit():
+        Message.query.filter(Message.user_id == g.user.id).delete()
 
-    db.session.delete(g.user)
-    db.session.commit()
+        db.session.delete(g.user)
+        db.session.commit()
 
-    return redirect("/signup")
+        do_logout()
+
+
+        return redirect("/signup")
 
 
 ##############################################################################
@@ -359,10 +369,14 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of self & followed_users
     """
-# FIXME: fix query
+
+
+
     if g.user:
+        following_users_ids = [ u.id for u in g.user.following ]
+        following_users_ids.append(g.user.id)
         messages = (Message
-                    .query.filter(g.user.id == Message.user_id or Follow.user_following_id == Message.user_id )
+                    .query.filter(Message.user_id.in_(following_users_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
