@@ -35,6 +35,23 @@ class Follow(db.Model):
         primary_key=True,
     )
 
+class Like(db.Model):
+    """ Connection of liked messages <-> User  """
+    __tablename__ = 'likes'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id')
+    )
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id')
+    )
+
 
 class User(db.Model):
     """User in the system."""
@@ -88,11 +105,8 @@ class User(db.Model):
         nullable=False,
     )
 
-    likes = db.Column(
-        db.Integer
-    )
-
     messages = db.relationship('Message', backref="user")
+    likes = db.relationship('Like', backref = 'user')
 
     followers = db.relationship(
         "User",
@@ -158,6 +172,16 @@ class User(db.Model):
         found_user_list = [
             user for user in self.following if user == other_user]
         return len(found_user_list) == 1
+
+    def like_message(self, message):
+        """ User likes a message"""
+        if message.id not in self.likes:
+            self.likes.append(message.id)
+
+    def unlike_message(self, message):
+        """ User unlikes a message"""
+        if message.id in self.likes:
+            self.likes.remove(message.id)
 
 
 class Message(db.Model):

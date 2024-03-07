@@ -67,7 +67,8 @@ def signup():
     and re-present form.
     """
     if CURR_USER_KEY in session:
-        return redirect(f"/users/{g.user.id}")
+        user_id = session[CURR_USER_KEY]
+        return redirect(f"/users/{user_id}")
 
     do_logout()
 
@@ -96,8 +97,7 @@ def signup():
 
         return redirect("/")
 
-    else:
-        return render_template('users/signup.html', form=form)
+    return render_template('users/signup.html', form=form)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -107,7 +107,8 @@ def login():
     form = LoginForm()
 
     if CURR_USER_KEY in session:
-        return redirect(f"/users/{g.user.id}")
+        user_id = session[CURR_USER_KEY]
+        return redirect(f"/users/{user_id}")
 
     if form.validate_on_submit():
         user = User.authenticate(
