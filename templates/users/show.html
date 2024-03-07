@@ -20,7 +20,7 @@
         <p>{{ message.text }}</p>
       </div>
     </li>
-    {{ form.hidden_tag() }}
+    {{ g.csrf_form.hidden_tag() }}
     {% endfor %}
 
   </ul>

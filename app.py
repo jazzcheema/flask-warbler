@@ -66,11 +66,10 @@ def signup():
     If the there already is a user with that username: flash message
     and re-present form.
     """
+    if CURR_USER_KEY in session:
+        return redirect(f"/users/{g.user.id}")
 
     do_logout()
-
-    if CURR_USER_KEY in session:
-        return redirect(f"/users/{CURR_USER_KEY}")
 
     form = UserAddForm()
 
@@ -108,7 +107,7 @@ def login():
     form = LoginForm()
 
     if CURR_USER_KEY in session:
-        return redirect(f"/users/{CURR_USER_KEY}")
+        return redirect(f"/users/{g.user.id}")
 
     if form.validate_on_submit():
         user = User.authenticate(
@@ -179,7 +178,7 @@ def show_user(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    return render_template('users/show.html', user=user, form = g.csrf_form)
+    return render_template('users/show.html', user=user)
 
 
 @app.get('/users/<int:user_id>/following')
@@ -191,7 +190,7 @@ def show_following(user_id):
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/following.html', user=user, form= g.csrf_form)
+    return render_template('users/following.html', user=user)
 
 
 @app.get('/users/<int:user_id>/followers')
@@ -203,7 +202,7 @@ def show_followers(user_id):
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-    return render_template('users/followers.html', user=user, form= g.csrf_form)
+    return render_template('users/followers.html', user=user)
 
 
 @app.post('/users/follow/<int:follow_id>')
@@ -267,9 +266,8 @@ def profile():
             g.user.header_image_url = form.header_image_url.data
 
             db.session.commit()
-            user_id = session[CURR_USER_KEY]
 
-            return redirect(f"/users/{user_id}")
+            return redirect(f"/users/{g.user.id}")
         else:
             flash("Wrong password")
 
@@ -368,8 +366,6 @@ def homepage():
     - logged in: 100 most recent messages of self & followed_users
     """
 
-
-
     if g.user:
         following_users_ids = [ u.id for u in g.user.following ]
         following_users_ids.append(g.user.id)
@@ -381,8 +377,7 @@ def homepage():
 
         return render_template(
             'home.html',
-            messages=messages,
-            form = g.csrf_form)
+            messages=messages)
 
     else:
         return render_template('home-anon.html')

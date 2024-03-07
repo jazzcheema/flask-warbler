@@ -88,6 +88,10 @@ class User(db.Model):
         nullable=False,
     )
 
+    likes = db.Column(
+        db.Integer
+    )
+
     messages = db.relationship('Message', backref="user")
 
     followers = db.relationship(
