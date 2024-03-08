@@ -9,6 +9,7 @@ import os
 from unittest import TestCase
 
 from models import db, User, Message, Follow
+from sqlalchemy.exc import IntegrityError
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -89,12 +90,28 @@ class UserModelTestCase(TestCase):
         self.assertTrue(u3 == test_found_user)
 
     def test_user_signup_invalid(self):
-        u3 = User.signup("u3", "u3@email.com", "password", None)
-        db.session.flush()
-        u4 = User.signup("u4", "u3@email.com", "password", None)
-        db.session.flush()
+        try:
+            User.signup("u3", "u3@email.com", "password", None)
+            db.session.flush()
+            User.signup("u4", "u3@email.com", "password", None)
+            db.session.flush()
+        except IntegrityError as error:
+            self.assertIn("unique constraint", str(error))
 
-        self.assertRaises('UniqueViolation')
+    def test_user_authenticate(self):
+        u1 = User.query.get(self.u1_id)
+        test_user = User.authenticate(u1.username, 'password')
+        self.assertTrue(test_user == u1)
+
+    def test_user_username_fail_authenticate(self):
+        u1 = User.query.get(self.u1_id)
+        test_user = User.authenticate('failed', 'password')
+        self.assertFalse(test_user == u1)
+
+    def test_user_password_fail_authenticate(self):
+        u1 = User.query.get(self.u1_id)
+        test_user = User.authenticate(u1.username, u1.password)
+        self.assertFalse(test_user == u1)
 
 
 
