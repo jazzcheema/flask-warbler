@@ -362,6 +362,9 @@ def like_unlike_message(message_id):
 
     message = Message.query.get_or_404(message_id)
 
+    if message.user_id == g.user.id:
+        return redirect(f"/users/{g.user.id}")
+
     if message not in g.user.like_messages:
         g.user.like_messages.append(message)
         db.session.commit()
@@ -371,6 +374,13 @@ def like_unlike_message(message_id):
         g.user.like_messages.remove(message)
         db.session.commit()
         return redirect(f"/users/{g.user.id}")
+
+
+@app.get('/users/<int:user_id>/likes')
+def show_user_liked_mesages(user_id):
+
+
+    return render_template('/users/likes.html')
 
 
 

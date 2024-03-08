@@ -18,13 +18,14 @@
           {{ message.timestamp.strftime('%d %B %Y') }}
         </span>
         <p>{{ message.text }}</p>
-        {% if message.id in g.user.like_messages %}
+        {% if g.user.id != message.user_id and message in g.user.like_messages %}
+
         <form>
           {{ g.csrf_form.hidden_tag() }}
           <button type="submit" formmethod="POST" formaction="/messages/{{message.id}}/like" class="messages-like"><i
               class="bi bi-star-fill"></i></button>
         </form>
-        {% elif g.user.id not in g.user.like_messages %}
+        {% elif message not in g.user.like_messages %}
         <form>
           {{ g.csrf_form.hidden_tag() }}
           <button type="submit" formmethod="POST" formaction="/messages/{{message.id}}/like" class="messages-like"><i
