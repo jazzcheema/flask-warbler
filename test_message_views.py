@@ -68,3 +68,33 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertEqual(resp.status_code, 302)
 
             Message.query.filter_by(text="Hello").one()
+
+    def test_form_user_add_message_not_valid(self):
+        with app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.post("/messages/new", data={"text": ""})
+
+            self.assertEqual(resp.status_code, 200)
+
+    def test_wrong_user_add_message(self):
+        with app.test_client() as client:
+            resp = client.get("/messages/new")
+
+            self.assertEqual(resp.status_code, 302)
+
+
+    def test_logged_out_user_fails_view_message(self):
+        with app.test_client() as client:
+            resp = client.get(f"/messages/{self.m1_id}")
+
+            self.assertEqual(resp.status_code, 302)
+
+
+
+
+
+
+
+
