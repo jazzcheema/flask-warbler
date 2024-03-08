@@ -106,7 +106,7 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
         with app.test_client() as c:
             u1 = User.query.get(self.u1_id)
 
-            resp = c.post(f"/messages/{self.m1_id}/delete")
+            resp = c.get(f"/messages/{self.m1_id}/delete")
 
             self.assertEqual(len(u1.messages), 1)
             self.assertEqual(resp.status_code, 302)
@@ -128,6 +128,8 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             resp = c.post(f"/messages/{m2.id}/delete")
             self.assertEqual(len(u2.messages), 1)
             self.assertEqual(resp.status_code, 302)
+
+
 
 
 

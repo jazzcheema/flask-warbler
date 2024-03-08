@@ -336,7 +336,7 @@ def show_message(message_id):
     return render_template('messages/show.html', message=msg)
 
 
-@app.post('/messages/<int:message_id>/delete')
+@app.route('/messages/<int:message_id>/delete', methods =["GET", "POST"])
 def delete_message(message_id):
     """Delete a message.
 
@@ -344,14 +344,14 @@ def delete_message(message_id):
     Redirect to user page on success.
     """
     message = Message.query.get_or_404(message_id)
-    u_id = session[CURR_USER_KEY]
-
-    if u_id != message.user_id:
-        return redirect(request.referrer)
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
+
+    if g.user.id != message.user_id:
+        return redirect(f"/users/{g.user.id}")
+
 
     if g.csrf_form.validate_on_submit():
         msg = Message.query.get_or_404(message_id)
@@ -359,6 +359,8 @@ def delete_message(message_id):
         db.session.commit()
 
         return redirect(f"/users/{g.user.id}")
+
+    return redirect('/')
 
 
 @app.post('/messages/<int:message_id>/like')
