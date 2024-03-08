@@ -45,11 +45,13 @@ class Like(db.Model):
     )
     message_id = db.Column(
         db.Integer,
-        db.ForeignKey('messages.id')
+        db.ForeignKey('messages.id'),
+        primary_key=True
     )
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id')
+        db.ForeignKey('users.id'),
+        primary_key=True
     )
 
 

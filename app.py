@@ -350,35 +350,46 @@ def delete_message(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get_or_404(message_id)
-    db.session.delete(msg)
-    db.session.commit()
+    if g.csrf_form.validate_on_submit():
+        msg = Message.query.get_or_404(message_id)
+        db.session.delete(msg)
+        db.session.commit()
 
-    return redirect(f"/users/{g.user.id}")
+        return redirect(f"/users/{g.user.id}")
 
 
 @app.post('/messages/<int:message_id>/like')
 def like_unlike_message(message_id):
+    """ Like and unlike a message.
+        Redirects to users liked messages page.
+    """
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
 
-    message = Message.query.get_or_404(message_id)
+    if g.csrf_form.validate_on_submit():
+        message = Message.query.get_or_404(message_id)
 
-    if message.user_id == g.user.id:
-        return redirect(f"/users/{g.user.id}")
+        if message.user_id == g.user.id:
+            return redirect(f"/users/{g.user.id}")
 
-    if message not in g.user.like_messages:
-        g.user.like_messages.append(message)
-        db.session.commit()
-        return redirect(f"/users/{g.user.id}")
+        if message not in g.user.like_messages:
+            g.user.like_messages.append(message)
+            db.session.commit()
+            return redirect(request.referrer)
 
+        else:
+            g.user.like_messages.remove(message)
+            db.session.commit()
+            return redirect(request.referrer)
     else:
-        g.user.like_messages.remove(message)
-        db.session.commit()
-        return redirect(f"/users/{g.user.id}")
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
 
 
 @app.get('/users/<int:user_id>/likes')
 def show_user_liked_mesages(user_id):
-
+    """ Render template to show list of users liked messages"""
 
     return render_template('/users/likes.html')
 
