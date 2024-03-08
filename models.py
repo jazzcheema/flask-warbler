@@ -106,7 +106,8 @@ class User(db.Model):
     )
 
     messages = db.relationship('Message', backref="user")
-    likes = db.relationship('Like', backref = 'user')
+
+    like_messages = db.relationship('Message', secondary = "likes")
 
     followers = db.relationship(
         "User",
@@ -173,22 +174,6 @@ class User(db.Model):
             user for user in self.following if user == other_user]
         return len(found_user_list) == 1
 
-    def like_message(self, message):
-        """ User likes a message"""
-        if message not in self.likes:
-            like = Like(message_id=message.id, user_id=message.user_id)
-            self.likes.append(like)
-            return True
-        else:
-            return False
-
-    def unlike_message(self, message):
-        """ User unlikes a message"""
-        if  message.id in self.likes:
-            Like.query.filter(message.id == Like.message_id).delete()
-            return True
-        else:
-            return False
 
 
 class Message(db.Model):

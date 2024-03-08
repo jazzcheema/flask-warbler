@@ -175,7 +175,7 @@ def list_users():
 @app.get('/users/<int:user_id>')
 def show_user(user_id):
     """Show user profile."""
-
+    # breakpoint()
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -359,15 +359,16 @@ def delete_message(message_id):
 
 @app.post('/messages/<int:message_id>/like')
 def like_unlike_message(message_id):
-    #TODO: pass instance get or 404
 
     message = Message.query.get_or_404(message_id)
-    if g.user.like_message(message):
+
+    if message not in g.user.like_messages:
+        g.user.like_messages.append(message)
         db.session.commit()
         return redirect(f"/users/{g.user.id}")
 
     else:
-        g.user.unlike_message(message)
+        g.user.like_messages.remove(message)
         db.session.commit()
         return redirect(f"/users/{g.user.id}")
 
