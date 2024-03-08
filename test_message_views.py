@@ -91,6 +91,54 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
             self.assertEqual(resp.status_code, 302)
 
+    def test_delete_message(self):
+        with app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+            u1 = User.query.get(self.u1_id)
+
+            resp = c.post(f"/messages/{self.m1_id}/delete")
+
+            self.assertEqual(len(u1.messages), 0)
+            self.assertEqual(resp.status_code, 302)
+
+    def test_logged_out_user_delete_message(self):
+        with app.test_client() as c:
+            u1 = User.query.get(self.u1_id)
+
+            resp = c.post(f"/messages/{self.m1_id}/delete")
+
+            self.assertEqual(len(u1.messages), 1)
+            self.assertEqual(resp.status_code, 302)
+
+    def test_user_delete_message_other_user(self):
+        with app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            u2 = User.signup("u2", "u2@email.com", "password", None)
+            db.session.flush()
+
+            m2 = Message(text="m2-text", user_id=u2.id)
+
+            db.session.add_all([m2])
+            db.session.flush()
+
+
+            resp = c.post(f"/messages/{m2.id}/delete")
+            self.assertEqual(len(u2.messages), 1)
+            self.assertEqual(resp.status_code, 302)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

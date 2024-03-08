@@ -343,6 +343,11 @@ def delete_message(message_id):
     Check that this message was written by the current user.
     Redirect to user page on success.
     """
+    message = Message.query.get_or_404(message_id)
+    u_id = session[CURR_USER_KEY]
+
+    if u_id != message.user_id:
+        return redirect(request.referrer)
 
     if not g.user:
         flash("Access unauthorized.", "danger")
