@@ -49,3 +49,58 @@ class UserModelTestCase(TestCase):
         # User should have no messages & no followers
         self.assertEqual(len(u1.messages), 0)
         self.assertEqual(len(u1.followers), 0)
+
+
+    def test_user_model_following(self):
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+        u1.following.append(u2)
+
+        self.assertEqual(u1.is_following(u2), True)
+
+    def test_user_model_not_following(self):
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+        self.assertEqual(u1.is_following(u2), False)
+
+    def test_user_model_followed_by(self):
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+
+        u2.following.append(u1)
+
+        self.assertTrue(u1.is_followed_by(u2))
+
+    def test_user_model_followed_by_other_user(self):
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+
+        self.assertFalse(u1.is_followed_by(u2))
+
+    def test_user_signup_on_valid(self):
+        u3 = User.signup("u3", "u3@email.com", "password", None)
+        db.session.flush()
+
+        test_found_user = User.query.filter_by(username = 'u3').first()
+
+        self.assertTrue(u3 == test_found_user)
+
+    def test_user_signup_invalid(self):
+        u3 = User.signup("u3", "u3@email.com", "password", None)
+        db.session.flush()
+        u4 = User.signup("u4", "u3@email.com", "password", None)
+        db.session.flush()
+
+        self.assertRaises('UniqueViolation')
+
+
+
+
+
+
+
+
+

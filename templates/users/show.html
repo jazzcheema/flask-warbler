@@ -18,7 +18,18 @@
           {{ message.timestamp.strftime('%d %B %Y') }}
         </span>
         <p>{{ message.text }}</p>
-
+        {% if g.user.id != message.user_id%}
+        <form>
+          {{ g.csrf_form.hidden_tag() }}
+          <button type="submit" formmethod="POST" formaction="/messages/{{message.id}}/like" class="messages-like">
+            {% if g.user.id != message.user_id and message in g.user.like_messages %}
+            <i class="bi bi-star-fill"></i>
+            {% else %}
+            <i class="bi bi-star"></i>
+            {% endif %}
+          </button>
+        </form>
+        {% endif %}
       </div>
     </li>
     {% endfor %}

@@ -11,8 +11,6 @@ load_dotenv()
 
 CURR_USER_KEY = "curr_user"
 
-LIKED_STAR = "bi bi-star-fill"
-UNLIKED_STAR = "bi bi-star"
 
 app = Flask(__name__)
 
@@ -175,7 +173,7 @@ def list_users():
 @app.get('/users/<int:user_id>')
 def show_user(user_id):
     """Show user profile."""
-    # breakpoint()
+
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -360,7 +358,7 @@ def delete_message(message_id):
 
 @app.post('/messages/<int:message_id>/like')
 def like_unlike_message(message_id):
-    """ Like and unlike a message.
+    """Like and unlike a message.
         Redirects to users liked messages page.
     """
     if not g.user:

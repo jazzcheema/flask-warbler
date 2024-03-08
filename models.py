@@ -39,19 +39,19 @@ class Like(db.Model):
     """ Connection of liked messages <-> User  """
     __tablename__ = 'likes'
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
+    # id = db.Column(
+    #     db.Integer,
+    #     primary_key=True
+    # )
     message_id = db.Column(
         db.Integer,
         db.ForeignKey('messages.id'),
-        primary_key=True
+        primary_key=True,
     )
     user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id'),
-        primary_key=True
+        primary_key=True,
     )
 
 
