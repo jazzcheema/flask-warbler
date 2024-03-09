@@ -73,15 +73,16 @@ class UserViewTestCase(TestCase):
             self.assertIn('<!-- home_page_for_users -->', html)
             self.assertEqual(resp.status_code, 200)
 
-    # def test_log_out(self):
-    #     with app.test_client() as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = self.u1_id
+    def test_log_out(self):
+        with app.test_client() as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
 
-    #         resp = c.post("/logout")
+            resp = c.post("/logout", follow_redirects=True)
+            html = resp.get_data(as_text=True)
 
-    #         self.assertEqual(sess[CURR_USER_KEY] is None, True)
-    #         self.assertEqual(resp.status_code, 302)
+            self.assertIn("What's Happening?", html)
+            self.assertEqual(resp.status_code, 200)
 
 
 
