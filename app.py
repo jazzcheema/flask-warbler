@@ -79,8 +79,7 @@ def signup():
         if User.query.filter(form.email.data == User.email).one_or_none():
             form.email.errors = ["Email already exists"]
             return render_template('users/signup.html', form=form)
-        # if User.query.filter(form.email.data == User.email).one_or_none():
-        #     errs.append("Email already exists")
+       
         try:
             user = User.signup(
                 username=form.username.data,
