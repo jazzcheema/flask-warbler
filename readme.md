@@ -120,6 +120,10 @@ Install the application to explore CRUD functionality. This is a great place to 
 <br/>
 ![Screenshot](./assets/single-message.png)
 *View a user's message by clicking on their message. You can now view a single message, or favorite this message to add it to your profile-- a 'retweet'.*
+<br/>
+<br/>
+![Screenshot](./assets/database-design.png)
+*Database design sketch-- implemented with SQLAlchemy for database integration.*
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
